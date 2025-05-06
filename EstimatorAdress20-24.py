@@ -31,16 +31,23 @@ class Net(nn.Module):
 # Train function
 def train():
     house_pdf = pd.read_parquet("dataset/DKHousingPrices.parquet")
+
+    house_pdf['date'] = pd.to_datetime(house_pdf['date'])
+
+    house_pdf['year'] = house_pdf['date'].dt.year
+
     house_pdf = house_pdf[(house_pdf['year_build'] >= 2020) & (house_pdf['year_build'] <= 2024)]
 
-    house_pdf = onehot_encode(house_pdf, 'zip_code', 'zip')
+    house_pdf = onehot_encode(house_pdf, 'zip_code', 'zip')   
 
     drop_features = [
         'address', '%_change_between_offer_and_purchase', 'house_id', 'dk_ann_infl_rate%', 'yield_on_mortgage_credit_bonds%', 'date', 'sales_type', 'house_type',
-        'city', 'area', 'region', 'quarter', 'sqm_price', 'year_build'
+        'city', 'area', 'region', 'quarter', 'sqm_price', 'year_build', 'year'
     ]
 
     house_pdf = house_pdf.drop(drop_features, axis=1)
+
+    house_pdf = house_pdf.dropna()
 
     X = house_pdf.drop('purchase_price', axis=1).copy()
     y = house_pdf['purchase_price'].copy()
